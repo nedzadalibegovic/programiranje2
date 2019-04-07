@@ -92,10 +92,10 @@ public:
 				_niz[_trenutno] = item;
 				_trenutno += 1;
 				return true;
-				// ako nije, je li duplikat?
+			// ako nije, je li duplikat?
 			} else if (isDuplicate(item)) {
 				return false;
-				// ako nije duplikat, dodaj
+			// ako nije duplikat, dodaj
 			} else {
 				_niz[_trenutno] = item;
 				_trenutno += 1;
