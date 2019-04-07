@@ -19,8 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="other\linkedList.cpp" />
-    <ClCompile Include="stari_pr3\zadatak01.cpp" />
+    <ClCompile Include="stari_pr3\prvi_parcijalni_2017.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
