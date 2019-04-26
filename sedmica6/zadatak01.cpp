@@ -78,11 +78,11 @@ class Student {
 	int brojIndeksa;
 
 public:
-	int getBrojIndeksa();
-	void setBrojIndeksa(int brojIndeksa);
-
 	Kolekcija<int> ocjene;
-	void ispisOcjena();
+
+	int getBrojIndeksa() { return brojIndeksa; }
+	void setBrojIndeksa(int brojIndeksa) { this->brojIndeksa = brojIndeksa; }
+	void ispisOcjena() { cout << ocjene; }
 };
 
 //b) 
@@ -92,8 +92,11 @@ class osoba {
 	char* _imePrezime;
 public:
 	osoba(const char* ip);
-	//za vjezbu dodajte konstruktor kopije
 	~osoba();
+
+	//za vjezbu dodajte konstruktor kopije
+	osoba(const osoba& org) { _imePrezime = AlocirajNizKaraktera(org._imePrezime); }
+
 	const char* GetImePrezime() { return _imePrezime; }
 };
 osoba::osoba(const char* ip) {
