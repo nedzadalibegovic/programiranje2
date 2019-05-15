@@ -303,7 +303,7 @@ public:
 		_email = AlocirajNizKaraktera(email);
 	}
 	//Funkciju za ispis svih vrijednosti atributa klase.
-	void info() {
+	void info() override {
 		Osoba::info();
 		cout << "ID: [" << _id << "]\n" <<
 			"E-mail: " << _email << "\n";
@@ -330,7 +330,7 @@ public:
 	}
 
 	//Funkciju za evidenciju nove narudžbe sa zaračunatim popustom na sve proizvode.
-	void addNarudzba(Narudzba& nova) {
+	void addNarudzba(Narudzba& nova) override {
 		Klijent::getNarudzbe().DodajElemente(nova, nova.getIznosNarudzbe(_popust));
 	}
 
@@ -340,7 +340,7 @@ public:
 	}
 
 	//Funkciju za ispis svih vrijednosti atributa klase
-	void info() {
+	void info() override {
 		Klijent::info();
 		cout << "Parking oznaka: " << _parkingOznaka <<
 			"\nPopust: " << _popust << "\n";
@@ -398,45 +398,9 @@ void PronadjiKlijentePoImenuPrezimenu(Osoba* niz[], int max) {
 	const char* trazeniString = "Doe";
 	bool uslov = false;
 
-	// za ime
-	for (size_t i = 0; i < max; i++) {
-		for (size_t j = 0; j < strlen(niz[i]->getIme()); j++) {
-			if (niz[i]->getIme()[j] == trazeniString[0]) {
-				for (size_t k = 1; k < strlen(trazeniString); k++) {
-					if (niz[i]->getIme()[j + k] != trazeniString[k]) {
-						uslov = false;
-						break;
-					} else {
-						uslov = true;
-					}
-				}
-			}
-			if (uslov) {
-				niz[i]->info();
-				uslov = false;
-			}
-		}
-	}
-
-	// za prezime
-	for (size_t i = 0; i < max; i++) {
-		for (size_t j = 0; j < strlen(niz[i]->getPrezime()); j++) {
-			if (niz[i]->getPrezime()[j] == trazeniString[0]) {
-				for (size_t k = 1; k < strlen(trazeniString); k++) {
-					if (niz[i]->getPrezime()[j + k] != trazeniString[k]) {
-						uslov = false;
-						break;
-					} else {
-						uslov = true;
-					}
-				}
-			}
-			if (uslov) {
-				niz[i]->info();
-				uslov = false;
-			}
-		}
-	}
+	for (size_t i = 0; i < max; i++)
+		if (strstr(niz[i]->getIme(), trazeniString) || strstr(niz[i]->getPrezime(), trazeniString))
+			niz[i]->info();
 }
 
 int main() {
