@@ -21,7 +21,7 @@ public:
 			arr[i] = src.arr[i];
 	}
 
-	Matrix(Matrix&& src) {
+	Matrix(Matrix&& src) noexcept {
 		x = src.x;
 		y = src.y;
 		arr = src.arr;
@@ -30,6 +30,7 @@ public:
 
 	~Matrix() {
 		delete[] arr;
+		arr = nullptr;
 	}
 
 	friend void swap(Matrix& lhs, Matrix& rhs) {
