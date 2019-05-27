@@ -388,6 +388,7 @@ void GenerisiMailAdreseKlijentima(Osoba* niz[], int max) {
 			strcat_s(temp, len, ptr->getPrezime());
 			strcat_s(temp, len, "@fit.ba");
 			ptr->setAdresa(temp);
+			delete[] temp;
 		}
 	}
 }
@@ -396,7 +397,6 @@ void GenerisiMailAdreseKlijentima(Osoba* niz[], int max) {
 //o svim klijentima koji sadrže uneseni tekst u dijelu imena ili prezimena.
 void PronadjiKlijentePoImenuPrezimenu(Osoba* niz[], int max) {
 	const char* trazeniString = "Doe";
-	bool uslov = false;
 
 	for (size_t i = 0; i < max; i++)
 		if (strstr(niz[i]->getIme(), trazeniString) || strstr(niz[i]->getPrezime(), trazeniString))
