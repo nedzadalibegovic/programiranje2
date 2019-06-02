@@ -324,7 +324,7 @@ public:
 						for (size_t i = 0; i < dog.GetObaveze()->GetTrenutno(); i++) {
 							if (dog.GetObaveze()->GetElement1(i) == obaveza) {
 								if (!dog.GetObaveze()->GetElement2(i)) {
-									dog.GetObaveze()->GetElement2(i) = false;
+									dog.GetObaveze()->GetElement2(i) = true;
 									return true;
 								}
 							}
