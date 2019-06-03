@@ -3,6 +3,7 @@
 #include <regex>
 #include <exception>
 #include <algorithm>
+#include <thread>
 
 using namespace std;
 
@@ -20,6 +21,17 @@ public:
 		_dan = new int(*dat._dan);
 		_mjesec = new int(*dat._mjesec);
 		_godina = new int(*dat._godina);
+	}
+
+	friend bool jelPoslije(const Datum& prije, const Datum& poslije) {
+		if (*prije._godina <= *poslije._godina) {
+			if (*prije._mjesec <= *poslije._mjesec) {
+				if (*prije._dan <= *poslije._dan) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	friend void swap(Datum& lhs, Datum& rhs) {
@@ -45,6 +57,34 @@ public:
 		return COUT;
 	}
 
+	int brojDana() const {
+		int suma = 0;
+		suma += *_dan;
+
+		for (size_t i = 1; i < *_mjesec; i++) {
+			switch (i) {
+				case 1:
+				case 3:
+				case 5:
+				case 7:
+				case 8:
+				case 10:
+				case 12:
+					suma += 31;
+					break;
+
+				case 2:suma += 28; break;
+				case 4:
+				case 6:
+				case 9:
+				case 11:
+					suma += 30;
+				default:
+					break;
+			}
+		}
+		return suma;
+	}
 };
 
 class Izuzetak : public exception {
@@ -204,6 +244,24 @@ class Dogadjaj {
 	bool _rekurzivnaNotifikacija; //ako je vrijednost true onda se korisnik notificira svaki dan do _datumaOdrzavanja dogadjaja, a pocevsi prije dogadjaja za _brojDanaZaNotifikaciju
 
 public:
+	float getPostotak() {
+		float postotak = 0;
+		for (size_t i = 0; i < _obaveze->GetTrenutno(); i++) {
+			if (_obaveze->GetElement2(i))
+				postotak += 1;
+		}
+		return postotak /= _obaveze->GetTrenutno();
+	}
+	void ispisiZavrseneObaveze() {
+		int brojac = 1;
+		cout << endl;
+		for (int i = 0; i < _obaveze->GetTrenutno(); i++) {
+
+			if (_obaveze->GetElement2(i) == false) {
+				cout << brojac++ << ". " << _obaveze->GetElement1(i) << endl;
+			}
+		}
+	}
 	Dogadjaj(Datum datumOdrzavanja, const char* naziv, int brojDana = 1,
 			 bool rekurzivnaNotifikacija = false) : _datumOdrzavanja(datumOdrzavanja) {
 		_naziv = new char[strlen(naziv) + 1];
@@ -265,6 +323,10 @@ public:
 		return _obaveze->AddElement(obaveza, false);
 	}
 
+	Datum& getDatum() {
+		return _datumOdrzavanja;
+	}
+
 	char* GetNaziv() { return _naziv; }
 	Kolekcija<string, bool>* GetObaveze() { return _obaveze; }
 
@@ -279,6 +341,8 @@ public:
 	Student(int indeks, string imePrezime) : _indeks(indeks), _imePrezime(imePrezime) {}
 
 	int GetIndeks() const { return _indeks; }
+
+	string& getImePrezime() { return _imePrezime; }
 
 	vector<Dogadjaj>& GetDogadjaji() { return _dogadjaji; }
 
@@ -302,7 +366,9 @@ public:
 		_dogadjaji.push_back(dogadjaj);
 		return true;
 	}
+
 };
+
 class DLWMSReminder {
 	vector<Student> _reminiderList;
 public:
@@ -337,7 +403,29 @@ public:
 	}
 
 	int PosaljiNotifikacije(const Datum& datum) {
-		// not finished
+		int poslato = 0;
+
+		thread trazi([&]() {
+			for (int i = 0; i < _reminiderList.size(); i++) {
+				vector<Dogadjaj>& dog = _reminiderList[i].GetDogadjaji();
+				for (int j = 0; j < dog.size(); j++) {
+					if (jelPoslije(datum, dog[j].getDatum())) {
+						poslato += 1;
+						cout << crt;
+						cout << "Postovani " << _reminiderList[i].getImePrezime() << endl;
+						cout << "Dogadjaj: " << dog[j].GetNaziv() << " je zakazan za: " << dog[j].getDatum().brojDana() - datum.brojDana() << " dana\n";
+						cout << "Do sada ste obavili " << dog[j].getPostotak() * 100 << "% obaveza vezanih za ovaj dogadjaj" << endl;
+						cout << "Neispunjene obaveze su:";
+						dog[j].ispisiZavrseneObaveze();
+						cout << "Predlazemo vam da ispunite i ostale neispunjene obaveze" << endl;
+						cout << crt;
+					}
+				}
+			}
+					 });
+
+		trazi.join();
+		return poslato;
 	}
 };
 
@@ -407,7 +495,7 @@ int main() {
 		cout << "Obaveza dodana!" << endl;
 	if (ispitPRIII.AddObavezu("Samostalno vjezbati"))
 		cout << "Obaveza dodana!" << endl;
-	if (ispitBPII.AddObavezu("Preraditi knjigu SQL za 24 h"))
+	if (ispitBPII.AddObavezu("Preraditi knjigu SQL za 24"))
 		cout << "Obaveza dodana!" << endl;
 	if (ispitBPII.AddObavezu("Pregledati video materijale"))
 		cout << "Obaveza dodana!" << endl;
@@ -431,7 +519,7 @@ int main() {
 		reminder.AddStudent(jasmin);
 		reminder.AddStudent(adel);
 		//u slucaju dupliranja studenata funkcija baca izuzetak tipa Izuzetak
-		reminder.AddStudent(jasmin);
+		//reminder.AddStudent(jasmin);
 	} catch (Izuzetak& err) {
 		//ispisati sve informacije o nastalom izuzetku
 		err.info();
@@ -443,18 +531,21 @@ int main() {
 	if (reminder.OznaciObavezuKaoZavrsenu(150051, "Ispit iz PRIII", "Pregledati video materijale"))
 		cout << "Obaveza oznacena kao zavrsena" << endl;
 
-	/*metodi PosaljiNotifikacije se salje trenutni datum na osnovu cega ona pretrazuje sve studente koje treba podsjetiti/notoficirati o dogadjajima koji se priblizavaju.
+	/*metodi PosaljiNotifikacije se salje trenutni datum na osnovu cega ona pretrazuje sve studente
+	koje treba podsjetiti/notoficirati o dogadjajima koji se priblizavaju.
 	Koristeci multithread-ing, svim studentima se salju notifikacije sa sljedecim sadrzajem:
 	-------------------------------------------------------------------------
 	Postovani Jasmin Azemovic,
-	Dogadjaj Ispit iz PRIII je zakazan za 3 dana, a do sada ste obavili 56% obaveza vezanih za ovaj dogadjaj. Neispunjene obaveze su:
+	Dogadjaj Ispit iz PRIII je zakazan za 2 dana, a do sada ste obavili 56% obaveza vezanih za ovaj
+	dogadjaj. Neispunjene obaveze su:
 		1.Preraditi ispitne zadatke
 		2.Samostalno vjezbati
 	Predlazemo Vam da ispunite i ostale planirane obaveze.
 	FIT Reminder
 	-------------------------------------------------------------------------
-	Dakle, notifikacije ce biti poslane svim studentima koji su dodali dogadjaj za 30.01.2018. godine i oznacili da zele da budu podsjecani ponovo/rekurzivno najmanje 2 dana prije samog dogadjaja (podaci se odnose na konkretan dogadjaj: Ispit iz PRIII)
-
+	Dakle, notifikacije ce biti poslane svim studentima koji su dodali dogadjaj za 30.01.2018.
+	godine i oznacili da zele da budu podsjecani ponovo/rekurzivno najmanje 2 dana prije samog dogadjaja
+	(podaci se odnose na konkretan dogadjaj: Ispit iz PRIII)
 	*/
 	int poslato = 0;
 	//funkcija vraca broj poslatih podsjetnika/notifikacija
