@@ -224,19 +224,14 @@ public:
 		minute += (*_sati) * 60;
 
 		return minute;
-
 	}
 
-	friend bool operator<(const DatumVrijeme& lhs, const DatumVrijeme& rhs) {
+	friend bool operator<(DatumVrijeme& lhs, DatumVrijeme& rhs) {
 		return lhs.uMinute() < rhs.uMinute();
 	}
 
-	friend bool operator>(const DatumVrijeme& lhs, const DatumVrijeme& rhs) {
+	friend bool operator>(DatumVrijeme& lhs, DatumVrijeme& rhs) {
 		return !operator<(lhs, rhs);
-	}
-
-	friend bool operator==(const DatumVrijeme& lhs, const DatumVrijeme& rhs) {
-		return lhs.uMinute() == rhs.uMinute();
 	}
 };
 
@@ -456,9 +451,41 @@ public:
 	}
 
 	vector<Predmet> operator()(DatumVrijeme* datumOD, DatumVrijeme* datumDO) {
-		for (size_t i = 0; i < _uspjeh.size(); i++) {
+		vector<Predmet> var;
 
+		for (size_t i = 0; i < _uspjeh.size(); i++) {
+			for (size_t j = 0; j < _uspjeh[i].GetPredmeti()->getTrenutno(); j++) {
+				DatumVrijeme& datum = _uspjeh[i].GetPredmeti()->getElement2(j);
+				if (datum > * datumOD && datum < *datumDO) {
+					var.push_back(_uspjeh[i].GetPredmeti()->getElement1(j));
+				}
+			}
 		}
+
+		delete datumOD;
+		delete datumDO;
+
+		return var;
+	}
+
+	Uspjeh* operator[](const char* godina) {
+		GodinaStudija trazena;
+
+		if (!strcmp(godina, "PRVA")) {
+			trazena = PRVA;
+		} else if (!strcmp(godina, "DRUGA")) {
+			trazena = DRUGA;
+		} else {
+			trazena = TRECA;
+		}
+
+		for (size_t i = 0; i < _uspjeh.size(); i++) {
+			if (*_uspjeh[i].GetGodinaStudija() == trazena) {
+				return &_uspjeh[i];
+			}
+		}
+
+		return nullptr;
 	}
 };
 
@@ -565,7 +592,7 @@ int main() {
 	for (Predmet u : jasminUspjeh)
 		cout << u << endl;
 
-	//Uspjeh* uspjeh_I_godina = jasmin["PRVA"];//vraca uspjeh Studenta ostvaren u prvoj godini studija
-	//if (uspjeh_I_godina != nullptr)
-	//	cout << *uspjeh_I_godina << endl;
+	Uspjeh* uspjeh_I_godina = jasmin["PRVA"];//vraca uspjeh Studenta ostvaren u prvoj godini studija
+	if (uspjeh_I_godina != nullptr)
+		cout << *uspjeh_I_godina << endl;
 }
