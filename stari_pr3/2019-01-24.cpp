@@ -4,11 +4,13 @@
 #include <sstream>
 #include <regex>
 #include <thread>
+#include <mutex>
 
 using namespace std;
 
 const char* crt = "\n-------------------------------------------\n";
 enum GodinaStudija { PRVA = 1, DRUGA, TRECA };
+mutex mtx;
 
 ostream& operator<<(ostream& out, const GodinaStudija& godina) {
 	static const char* ispis[] = { "I", "II", "III" };
@@ -332,6 +334,7 @@ class Student {
 	}
 
 	void email(GodinaStudija godina) {
+		lock_guard<mutex> lock(mtx);
 		cout << "FROM: info@fit.ba\n";
 		cout << "TO : " << _emailAdresa << "\n";
 		cout << "Postovani " << _imePrezime << ", evidentirali ste uspjeh za " << godina << " godinu studija.\nPozdrav.\nFIT Team.\n";
@@ -347,6 +350,7 @@ class Student {
 		prosjek /= obj.GetPredmeti()->getTrenutno();
 
 		if (prosjek > 8) {
+			lock_guard<mutex> lock(mtx);
 			cout << "Svaka cast za uspjeh " << prosjek << " ostvaren u " << godina << " godini studija\n";
 		}
 	}
