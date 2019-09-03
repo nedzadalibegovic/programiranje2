@@ -195,7 +195,7 @@ public:
 		swap(lhs._brojTelefona, rhs._brojTelefona);
 	}
 
-	~Polaznik() { delete[] _imePrezime; }
+	virtual ~Polaznik() { delete[] _imePrezime; }
 
 	friend bool operator==(const Polaznik& lhs, const Polaznik& rhs) {
 		return !strcmp(lhs._imePrezime, rhs._imePrezime) || lhs._brojTelefona == rhs._brojTelefona;
